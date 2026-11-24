@@ -101,22 +101,55 @@ public class LostAndFoundDb
     // Part B: read it back
     // ---------------------------------------------------------------
 
-    // TODO Part B (demo): run the command's SELECT and turn every row into a FoundItem.
+    /// <summary>
+    /// Reads the query results and creates a list of found items.
+    /// </summary>
+    /// <param name="command">The SQL command used to retrieve the items.</param>
+    /// <returns>A list of found items from query results.</returns>
     private static List<FoundItem> ReadItems(SqliteCommand command)
     {
-        throw new NotImplementedException("TODO Part B: ReadItems");
+        List<FoundItem> items = new List<FoundItem>();
+
+        using SqliteDataReader reader = command.ExecuteReader();
+
+        while (reader.Read())
+        {
+            int id = reader.GetInt32(0);
+            string description = reader.GetString(1);
+            string location = reader.GetString(2);
+
+            items.Add(new FoundItem(id, description, location));
+        }
+
+        return items;
     }
 
-    // TODO Part B (demo): return every item, oldest first.
+    /// <summary>
+    /// Returns all found items from the database, oldest first.
+    /// </summary>
+    /// <returns>A list of all found items.</returns>
     public List<FoundItem> All()
     {
-        throw new NotImplementedException("TODO Part B: All");
+        using SqliteConnection connection = Open();
+        using SqliteCommand command = connection.CreateCommand();
+
+        command.CommandText = "SELECT id, description, location FROM items ORDER BY id";
+
+        return ReadItems(command);
     }
 
-    // TODO Part B (demo): return how many items are waiting to be claimed.
+    /// <summary>
+    /// Counts the number of items currently stored in the database.
+    /// </summary>
+    /// <returns>The number of items waiting to be claimed.</returns>
     public int Count()
     {
-        throw new NotImplementedException("TODO Part B: Count");
+        using SqliteConnection connection = Open();
+        using SqliteCommand command = connection.CreateCommand();
+
+        command.CommandText = "SELECT COUNT(*) FROM items";
+
+        return Convert.ToInt32(command.ExecuteScalar());
     }
 
     // TODO Exercise 2: return items whose description or location contains the word, oldest first.
