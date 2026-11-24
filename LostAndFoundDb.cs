@@ -10,7 +10,9 @@ public class LostAndFoundDb
 {
     private readonly string connectionString;
 
-    /// <summary>Remembers which database file to use. Nothing is opened yet. (Given)</summary>
+    /// <summary>
+    /// Remembers which database file to use. Nothing is opened yet. (Given)
+    /// </summary>
     public LostAndFoundDb(string path)
     {
         connectionString = "Data Source=" + path;
@@ -20,22 +22,61 @@ public class LostAndFoundDb
     // Part A: save it
     // ---------------------------------------------------------------
 
-    // TODO Part A (demo): open a new connection to connectionString and return it.
+    /// <summary>
+    /// Opens and returns a connection to the SQLite database.
+    /// </summary>
+    /// <returns>The open database connection.</returns>
     private SqliteConnection Open()
     {
-        throw new NotImplementedException("TODO Part A: Open");
+        SqliteConnection connection = new SqliteConnection(connectionString);
+        connection.Open();
+        return connection;
     }
 
-    // TODO Part A (demo): create the items table if the file does not have it yet.
+    /// <summary>
+    /// Creates the items table if it does not already exist.
+    /// </summary>
     public void CreateTable()
     {
-        throw new NotImplementedException("TODO Part A: CreateTable");
+        using SqliteConnection connection = Open();
+        using SqliteCommand command = connection.CreateCommand();
+
+        command.CommandText = """
+            CREATE TABLE IF NOT EXISTS items (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                description TEXT NOT NULL,
+                location TEXT NOT NULL
+            )
+            """;
+
+        command.ExecuteNonQuery();
     }
 
-    // TODO Part A (demo): save a new item and return it with the id the database assigned.
+    /// <summary>
+    /// Adds a found item to the database and returns it with its assigned ID.
+    /// </summary>
+    /// <param name="description">Description of the found item.</param>
+    /// <param name="location">Location where the item was found.</param>
+    /// <returns>The saved item with its database assigned ID.</returns>
     public FoundItem Add(string description, string location)
     {
-        throw new NotImplementedException("TODO Part A: Add");
+        FoundItem item = new FoundItem(0, description, location);
+
+        using SqliteConnection connection = Open();
+        using SqliteCommand command = connection.CreateCommand();
+
+        command.CommandText = """ 
+            INSERT INTO items (description, location)
+            VALUES (@description, @location)
+            RETURNING id;
+            """;
+
+        command.Parameters.AddWithValue("@description", item.Description);
+        command.Parameters.AddWithValue("@location", item.Location);
+
+        int id = Convert.ToInt32(command.ExecuteScalar());
+
+        return new FoundItem(id, item.Description, item.Location);
     }
 
     // TODO Exercise 1: delete the item with this id. Return true when a row was deleted.
