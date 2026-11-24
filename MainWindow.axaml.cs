@@ -42,7 +42,7 @@ public partial class MainWindow : Window
     {
         ItemsList.Items.Clear();
 
-        foreach (FoundItem item in db.All())
+        foreach (FoundItem item in db.Search(SearchBox.Text ?? ""))
         {
             ItemsList.Items.Add(item);
         }
@@ -84,7 +84,7 @@ public partial class MainWindow : Window
 
         if (item == null)
         {
-            StatusText.Text = "Select an item to claim";
+            StatusText.Text = "Select an item to claim.";
             return;
         }
 
@@ -100,9 +100,13 @@ public partial class MainWindow : Window
         ShowItems();
     }
 
-    // TODO Exercise 3: show only the items that match the search box.
+    /// <summary>
+    /// Refreshes the displayed items when the search text changes.
+    /// </summary>
+    /// <param name="sender">The text box that raised the event.</param>
+    /// <param name="e">The text changed event arguments.</param>
     private void SearchBox_TextChanged(object? sender, TextChangedEventArgs e)
     {
-        throw new NotImplementedException("TODO Exercise 3: SearchBox_TextChanged");
+        ShowItems();
     }
 }

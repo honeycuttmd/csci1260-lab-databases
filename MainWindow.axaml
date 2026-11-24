@@ -12,6 +12,8 @@
 			<Button x:Name="AddButton" Content="Add item" Click="AddButton_Click" />
 		</StackPanel>
 
+		<TextBox x:Name="SearchBox" PlaceholderText="Search" Width="200" HorizontalAlignment="Left" TextChanged="SearchBox_TextChanged" />
+
 		<ListBox x:Name="ItemsList" Height="200" />
 
 		<StackPanel Orientation="Horizontal" Spacing="10">
