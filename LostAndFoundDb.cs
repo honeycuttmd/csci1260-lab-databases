@@ -13,6 +13,7 @@ public class LostAndFoundDb
     /// <summary>
     /// Remembers which database file to use. Nothing is opened yet. (Given)
     /// </summary>
+    /// <param name="path">The path to the SQLite database file.</param>
     public LostAndFoundDb(string path)
     {
         connectionString = "Data Source=" + path;
@@ -152,9 +153,24 @@ public class LostAndFoundDb
         return Convert.ToInt32(command.ExecuteScalar());
     }
 
-    // TODO Exercise 2: return items whose description or location contains the word, oldest first.
+    /// <summary>
+    /// Searches for found items by description or location, oldest first.
+    /// </summary>
+    /// <param name="word">The word to search for.</param>
+    /// <returns>A list of matching found items.</returns>
     public List<FoundItem> Search(string word)
     {
-        throw new NotImplementedException("TODO Exercise 2: Search");
+        using SqliteConnection connection = Open();
+        using SqliteCommand command = connection.CreateCommand();
+
+        command.CommandText = """
+            SELECT id, description, location FROM items
+            WHERE description LIKE @pattern OR location LIKE @pattern
+            ORDER BY id
+            """;
+
+        command.Parameters.AddWithValue("@pattern", "%" + word.Trim() + "%");
+
+        return ReadItems(command);
     }
 }
