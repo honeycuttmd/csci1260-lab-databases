@@ -11,40 +11,93 @@ public partial class MainWindow : Window
 {
     private readonly LostAndFoundDb db;
 
-    /// <summary>Opens the desk on lostandfound.db, next to the program. (Given)</summary>
+    /// <summary>
+    /// Opens the desk on lostandfound.db, next to the program. (Given)
+    /// </summary>
     public MainWindow() : this("lostandfound.db")
     {
     }
 
-    /// <summary>Opens the desk on any database file. The lab check uses this one. (Given, plus Part C)</summary>
+    /// <summary>
+    /// Opens the desk on any database file. The lab check uses this one. (Given, plus Part C)
+    /// </summary>
+    /// <param name="databasePath">The path to the SQLite database file.</param>
     public MainWindow(string databasePath)
     {
         InitializeComponent();
         db = new LostAndFoundDb(databasePath);
 
-        // TODO Part C (demo): create the table, then show the items.
+        db.CreateTable();
+        ShowItems();
     }
 
     // ---------------------------------------------------------------
     // Part C: show it
     // ---------------------------------------------------------------
 
-    // TODO Part C (demo): refill ItemsList and CountText from the database.
+    /// <summary>
+    /// Refreshes the list and count using the items stored in the database.
+    /// </summary>
     private void ShowItems()
     {
-        throw new NotImplementedException("TODO Part C: ShowItems");
+        ItemsList.Items.Clear();
+
+        foreach (FoundItem item in db.All())
+        {
+            ItemsList.Items.Add(item);
+        }
+
+        CountText.Text = $"Waiting to be claimed: {db.Count()}";
     }
 
-    // TODO Part C (demo): save what was typed, then clear the boxes and refresh the list.
+    /// <summary>
+    /// Adds a found item, clears the input boxes, and refreshes the list.
+    /// </summary>
+    /// <param name="sender">The button that raised the event.</param>
+    /// <param name="e">The button click event arguments.</param>
     private void AddButton_Click(object? sender, RoutedEventArgs e)
     {
-        throw new NotImplementedException("TODO Part C: AddButton_Click");
+        try
+        {
+            FoundItem item = db.Add(DescriptionBox.Text ?? "", LocationBox.Text ?? "");
+
+            DescriptionBox.Text = "";
+            LocationBox.Text = "";
+            StatusText.Text = $"Added: {item}";
+
+            ShowItems();
+        }
+        catch (ArgumentException ex)
+        {
+            StatusText.Text = ex.Message;
+        }
     }
 
-    // TODO Part C (demo): claim the selected item, or explain why it cannot.
+    /// <summary>
+    /// Claims the selected item and refreshes the list.
+    /// </summary>
+    /// <param name="sender">The button that raised the event.</param>
+    /// <param name="e">The button click event arguments.</param>
     private void ClaimButton_Click(object? sender, RoutedEventArgs e)
     {
-        throw new NotImplementedException("TODO Part C: ClaimButton_Click");
+        FoundItem? item = ItemsList.SelectedItem as FoundItem;
+
+        if (item == null)
+        {
+            StatusText.Text = "Select an item to claim";
+            return;
+        }
+
+        if (db.Claim(item.Id))
+        {
+            StatusText.Text = $"Claimed: {item}";
+        }
+        else
+        {
+            StatusText.Text = "That item was already claimed.";
+        }
+
+        ShowItems();
     }
 
     // TODO Exercise 3: show only the items that match the search box.
