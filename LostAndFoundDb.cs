@@ -79,10 +79,22 @@ public class LostAndFoundDb
         return new FoundItem(id, item.Description, item.Location);
     }
 
-    // TODO Exercise 1: delete the item with this id. Return true when a row was deleted.
+    /// <summary>
+    /// Deletes a found item from the database using its ID.
+    /// </summary>
+    /// <param name="id">The ID of the item to claim.</param>
+    /// <returns>True if an item was deleted; otherwise, false.</returns>
     public bool Claim(int id)
     {
-        throw new NotImplementedException("TODO Exercise 1: Claim");
+        using SqliteConnection connection = Open();
+        using SqliteCommand command = connection.CreateCommand();
+
+        command.CommandText = "DELETE FROM items WHERE id = @id";
+        command.Parameters.AddWithValue("@id", id);
+
+        int rowsDeleted = command.ExecuteNonQuery();
+
+        return rowsDeleted == 1;
     }
 
     // ---------------------------------------------------------------
